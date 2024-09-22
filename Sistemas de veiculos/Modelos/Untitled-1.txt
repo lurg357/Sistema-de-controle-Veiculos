@@ -1,0 +1,28 @@
+var vehicles = new List<Vehicle>();
+
+app.MapGet("/vehicles", () => vehicles)
+    .RequireAuthorization();
+
+app.MapGet("/vehicles/{id}", (int id) =>
+{
+    var vehicle = vehicles.FirstOrDefault(v => v.Id == id);
+    return vehicle is not null ? Results.Ok(vehicle) : Results.NotFound();
+})
+.RequireAuthorization();
+
+app.MapPost("/vehicles", (Vehicle vehicle) =>
+{
+    vehicle.Id = vehicles.Count + 1;
+    vehicles.Add(vehicle);
+    return Results.Created($"/vehicles/{vehicle.Id}", vehicle);
+})
+.RequireAuthorization();
+
+app.MapDelete("/vehicles/{id}", (int id) =>
+{
+    var vehicle = vehicles.FirstOrDefault(v => v.Id == id);
+    if (vehicle is null) return Results.NotFound();
+    vehicles.Remove(vehicle);
+    return Results.NoContent();
+})
+.RequireAuthorization();
